@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lambda-nextjs-ssr
+  
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  WebsiteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: website/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: get
+            PayloadFormatVersion: "1.0"
+      Environment:
+        Variables:
+          NODE_ENV: production
+          LAMBDA: true
+          STAGE: production
+
+Outputs:
+  WebsiteApi:
+    Description: "API Gateway endpoint URL for Prod stage for Website function"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  WebsiteFunction:
+    Description: "Website Lambda Function ARN"
+    Value: !GetAtt WebsiteFunction.Arn
+  WebsiteFunctionIamRole:
+    Description: "Implicit IAM Role created for Website function"
+    Value: !GetAtt WebsiteFunction.Arn
